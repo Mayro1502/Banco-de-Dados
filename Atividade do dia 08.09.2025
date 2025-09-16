@@ -1,0 +1,99 @@
+---- Atividade 1: Inserção de Dados com Valores Múltiplos ----
+
+CREATE TABLE clientes (
+    id_cliente SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    data_cadastro DATE DEFAULT CURRENT_DATE,
+    ativo BOOLEAN DEFAULT TRUE
+);
+
+INSERT INTO clientes (nome) VALUES
+('Beatriz'),
+('Estevão'),
+('Jeferson'),
+('Mayro'),
+('Raí');
+
+select * from clientes;
+
+
+---- Atividade 2: Atualização Condicional de Dados ----
+
+CREATE TABLE produtos (
+    id_produto SERIAL PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    categoria VARCHAR(50) NOT NULL,
+    preco NUMERIC(10,2) NOT NULL,
+    estoque INTEGER NOT NULL DEFAULT 0 CHECK (estoque >= 0)
+);
+
+INSERT INTO produtos (nome, categoria, preco, estoque) VALUES
+('Smartphone X',       'Eletrônicos',      1500.00, 10),
+('Televisor 42"',      'Eletrônicos',      2000.00,  5),
+('Fone de Ouvido',     'Eletrônicos',       200.00, 25),
+('Cadeira Escritório', 'Móveis',            350.00, 12),
+('Camiseta Polo',      'Vestuário',          50.00, 50),
+('Micro-ondas 20L',    'Eletrodomésticos',  400.00,  8);
+
+SELECT * FROM produtos ORDER BY id_produto;
+
+UPDATE produtos
+SET preco = ROUND(preco * 1.10, 2)
+WHERE categoria = 'Eletrônicos';
+
+SELECT * FROM produtos ORDER BY id_produto;
+
+
+---- Atividade 3: Exclusão com Subconsulta ----
+
+CREATE TABLE clientes (
+    id_cliente SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    data_cadastro DATE DEFAULT CURRENT_DATE,
+    ativo BOOLEAN DEFAULT TRUE
+);
+
+INSERT INTO clientes (nome) VALUES
+  ('Beatriz'),
+  ('Estevão'),
+  ('Jeferson'),
+  ('Mayro'),
+  ('Raí');
+
+  CREATE TABLE pedidos (
+  id SERIAL PRIMARY KEY,
+  fk_id_cliente INTEGER NOT NULL,
+  data_pedido DATE NOT NULL DEFAULT CURRENT_DATE,
+  valor_total NUMERIC(12,2) NOT NULL DEFAULT 0,
+  CONSTRAINT fk_pedidos_clientes FOREIGN KEY (fk_id_cliente)
+    REFERENCES clientes(id_cliente)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT
+);
+
+INSERT INTO pedidos (fk_id_cliente, data_pedido, valor_total) VALUES
+(1, '2025-09-10', 150.50),
+(2, '2025-09-11', 299.99),
+(2, '2025-09-12', 49.90),
+(3, '2025-09-13', 75.00),
+(4, '2025-09-14', 1200.00);
+
+UPDATE clientes
+SET ativo = false
+WHERE id_cliente = 2;
+
+WITH deletados AS (
+  DELETE FROM pedidos p
+  USING clientes c
+  WHERE p.fk_id_cliente = c.id_cliente
+    AND c.ativo = false
+  RETURNING p.*
+)
+SELECT COUNT(*) AS total_excluidos FROM deletados;
+
+SELECT p.id, p.fk_id_cliente, p.data_pedido, p.valor_total, c.nome, c.ativo
+FROM pedidos p 
+LEFT JOIN clientes c ON p.fk_id_cliente = c.id_cliente
+ORDER BY p.id;
