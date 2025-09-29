@@ -1,0 +1,54 @@
+Questão 1 
+
+SELECT length
+FROM film 
+WHERE length > 120 
+ORDER BY length DESC 
+limit 10;
+
+
+Questão 2
+
+SELECT f.title AS filme, c.name AS categoria
+FROM film f
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id
+ORDER BY f.title;
+
+
+Questão 3
+
+SELECT f.title AS filme,
+       COUNT(r.rental_id) AS total_alugueis,
+FROM film f
+JOIN inventory i ON f.film_id = i.film_id
+JOIN rental r ON i.inventory_id = r.inventory_id
+GROUP BY f.title
+ORDER BY total_alugueis DESC
+LIMIT 5;
+
+
+Questão 4
+
+SELECT c.first_name || ' ' || c.last_name AS cliente,
+       SUM(p.amount) AS total_gasto
+FROM customer c
+JOIN payment p ON c.customer_id = p.customer_id
+GROUP BY c.customer_id, c.first_name, c.last_name
+ORDER BY total_gasto DESC;
+
+
+Questão 5
+
+SELECT c.name AS categoria,
+       SUM(p.amount) AS receita_total
+FROM payment p
+JOIN rental r ON p.rental_id = r.rental_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id
+GROUP BY c.name
+ORDER BY receita_total DESC;
+
+
